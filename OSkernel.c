@@ -47,19 +47,19 @@ void osKernelInit(void){
 }
 
 void osKernelLaunch(uint32_t quanta){
-	//reset systick
+
 	SysTick->CTRL = SYSTICK_RST;
-	//reset bo dem cua systick ve 0
+
 	SysTick->VAL = 0;
-	//load quanta time 
+
 	SysTick->LOAD = (quanta*MILLIS_PRESCALER-1);
-	//set muc uu tien ngat cua systick la ca nhat trong he thong
+
 	NVIC_SetPriority(SysTick_IRQn, 0);
-	//bat systick su sung giao dong noi
+
 	SysTick->CTRL |= CTRL_CLCKSRC|CTRL_ENABLE;
-	//bat ngat cho systick
+
 	SysTick->CTRL |= CTRL_TICKINT;
-	//den ham os launch scheduler
+
 	osSchedulerLaunch();
 }
 
@@ -91,13 +91,13 @@ void osKernelStackInit(int i){
 }
 
 uint8_t osKernelAdd1Thread(void (*task)(void)){
-	//ko cho phep ngat toan cuc
+
 	__disable_irq();
-	//chay chuong trinh con osKernelStackInit voi so thread hien tai 
+
 	osKernelStackInit(current_num_of_thread);
-	//gan gia tri cua vung stack_size - 2 (vung nho cua thanh ghi pc) bang dia chi cua task duoc them vao
+
 	TCB_STACK[current_num_of_thread][STACK_SIZE-2] = (uint32_t)(task);
-	//gan nextPt cua thread truoc = stackPt cua thread tiep theo
+
 	if(!current_num_of_thread){
 		tcbs[current_num_of_thread].nextPt = &tcbs[current_num_of_thread];
 	} 
@@ -105,11 +105,11 @@ uint8_t osKernelAdd1Thread(void (*task)(void)){
 		tcbs[current_num_of_thread-1].nextPt = &tcbs[current_num_of_thread];
 		tcbs[current_num_of_thread].nextPt = &tcbs[0];
 	}
-	//gian gia tri con tro = tsb cua task dau tien
+
 	currentPt = &tcbs[0];
-	//tang gia tri thread hien tai len 1
+
 	current_num_of_thread++;
-	//cho phep ngat toan cuc
+
 	__enable_irq();
 	
 }
@@ -120,9 +120,9 @@ void osSchedulerRoundRobin(void){
 }
 //chuong trinh con chu dong bat ngat systick de chuyen task
 void osThreadYield(void){
-	//xoa bo dem cua systick
+
 	SysTick->VAL = 0;
-	//bat co ngat
+
 	INTCTRL |= PENDSTSET ;
 }
 //chuong trinh con xu ly ngat systick
