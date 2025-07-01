@@ -112,32 +112,31 @@ int main(void) {
 	}
 }
 //chuong trinh con khoi tao xung clock = 72M
-void RCC_Init(void) {
-		//bat HSE
-		RCC_HSEConfig(RCC_HSE_ON);
-		//cho cho bo hse duoc khoi dong
-		while ((RCC_WaitForHSEStartUp) == ERROR){};
-		//bat PLL
-		RCC_PLLConfig(RCC_PLLSource_HSE_Div1,RCC_PLLMul_9);
-		RCC_PLLCmd(ENABLE);
-		//cho cho bo PLL duoc khoi dong
-		while (RCC_GetFlagStatus(RCC_FLAG_HSERDY) == RESET){};
-		//cau hinh clock cho bo AHB = SYSCLK
-		RCC_HCLKConfig(RCC_SYSCLK_Div1);   
-    //cau hinh clock cho APB1 = AHB
-		RCC_PCLK1Config(RCC_HCLK_Div2);   
-		//cau hinh clock cho APB2 = AHB/2
-    RCC_PCLK2Config(RCC_HCLK_Div1);   
-		//chon nguon cho SYSCLK la nguon PLLCLK 
-		RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-		//cho cho nguon clock on dinh
-    while (RCC_GetSYSCLKSource() != 0x08) {};
-		//cau hinh cho bo nho flash
-		//Doi 2 chu ki cho bo nho flash on dinh
-    FLASH_SetLatency(FLASH_Latency_2);
-		//bat Prefetch Buffer
-    FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
+void RCC_Init(void){
+
+    RCC->CR |= RCC_CR_HSEON;
+    while (!(RCC->CR & RCC_CR_HSERDY));  
+
+    RCC->CFGR &= ~RCC_CFGR_PLLMULL;       
+    RCC->CFGR |= RCC_CFGR_PLLMULL9;       
+    RCC->CFGR |= RCC_CFGR_PLLSRC_HSE;     
+
+    RCC->CFGR &= ~RCC_CFGR_HPRE;          
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;     
+    RCC->CFGR &= ~RCC_CFGR_PPRE2;         
+
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY));   
+
+    RCC->CFGR &= ~RCC_CFGR_SW;            
+    RCC->CFGR |= RCC_CFGR_SW_PLL;         
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);  
+
+    FLASH->ACR |= FLASH_ACR_LATENCY_2;
+
+    FLASH->ACR |= FLASH_ACR_PRFTBE;
 }
+
 //chuong trinh con cau hinh gpio theo thu vien std
 void GPIO_Config(void) {
 		//cap xung clock cho gpio port A
